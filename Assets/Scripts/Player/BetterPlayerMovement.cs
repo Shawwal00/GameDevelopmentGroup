@@ -14,7 +14,7 @@ public class BetterPlayerMovement : MonoBehaviour
 
     // Movement
     private Vector2 move;
-    private float speed = 10;
+    [HideInInspector] public float speed = 10;
     private float playerRotation;
     private Rigidbody playerRB;
     Quaternion endRotation;
@@ -23,7 +23,7 @@ public class BetterPlayerMovement : MonoBehaviour
     private float jump;
     private float jumpDistance = 10;
     private bool jumping = false;
-    private int jumpMax = 1;
+    [HideInInspector] public int jumpMax = 1;
     private float jumpCooldown;
     private int currentJump = 1;
     private bool jumpButton = true;
@@ -31,8 +31,8 @@ public class BetterPlayerMovement : MonoBehaviour
 
     //Interact
     [HideInInspector] public float action;
-    private bool movementPU;
-    private float movementPUTimer;
+    //private bool movementPU;
+    //private float movementPUTimer;
 
     //Camera
     private Vector2 cameraVector;
@@ -115,7 +115,7 @@ public class BetterPlayerMovement : MonoBehaviour
     {
         PlayerControlsUpdate();
         CameraFollow();
-        PowerUps();
+        //PowerUps();
         Jumping();
         Attacking();
         Death();
@@ -198,7 +198,7 @@ public class BetterPlayerMovement : MonoBehaviour
         }
     }
 
-    private void PowerUps()
+    /*private void PowerUps()
     {
         if (action > 0)
         {
@@ -215,7 +215,7 @@ public class BetterPlayerMovement : MonoBehaviour
                 movementPU = false;
             }
         }
-    }
+    }*/
 
     private void CameraFollow()
     {
@@ -347,7 +347,7 @@ public class BetterPlayerMovement : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         //Checking for Power Ups
-        if (other.tag == "JumpPU")
+        /*if (other.tag == "JumpPU")
         {
             if (action > 0)
             {
@@ -364,6 +364,6 @@ public class BetterPlayerMovement : MonoBehaviour
                 speed = speed * 2;
                 movementPU = true;
             }
-        }
+        }*/
     }
 }
