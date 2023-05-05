@@ -47,8 +47,12 @@ public class EnemyAI : MonoBehaviour
         {
             GoBackToPatrol();
         }
+        if(damage_player <= 0) 
+        {
+            player.position = new Vector3(0, 0, 0);
+        }
 
-        
+        Debug.Log(damage_player);
     }
 
     void Chase() 
@@ -71,10 +75,11 @@ public class EnemyAI : MonoBehaviour
             healthController.ApplyDamage(damage);
         }
 
-        if (other.CompareTag("Player")) 
+        if (other.CompareTag("Player"))
         {
             other.GetComponent<PlayerStats>().TakeDamage(damage_player);
-            
+
         }
+
     }
 }

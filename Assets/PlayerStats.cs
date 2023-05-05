@@ -16,6 +16,16 @@ public class PlayerStats : MonoBehaviour
         HealthBar.SetSliderMax(MaxHealth);
     }
 
+    private void Update()
+    {
+        if (CurrentHealth <= 0)
+        {
+            transform.position = new Vector3(0, 10, 0);
+            CurrentHealth = 100;
+            HealthBar.SetSlider(CurrentHealth);
+        }
+    }
+
     public void TakeDamage(float amount) 
     {
         CurrentHealth -= amount;
