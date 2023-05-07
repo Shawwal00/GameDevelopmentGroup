@@ -32,7 +32,7 @@ public class SplineTrigger : MonoBehaviour
         else
         {
             // look at player
-            playerCamera.transform.LookAt(playerTarget.transform);
+           // playerCamera.transform.LookAt(playerTarget.transform);
         }
     }
 
