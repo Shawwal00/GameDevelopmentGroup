@@ -31,8 +31,6 @@ public class BetterPlayerMovement : MonoBehaviour
 
     //Interact
     [HideInInspector] public float action;
-    //private bool movementPU;
-    //private float movementPUTimer;
 
     //Camera
     private Vector2 cameraVector;
@@ -115,7 +113,6 @@ public class BetterPlayerMovement : MonoBehaviour
     {
         PlayerControlsUpdate();
         CameraFollow();
-        //PowerUps();
         Jumping();
         Attacking();
         Death();
@@ -197,25 +194,6 @@ public class BetterPlayerMovement : MonoBehaviour
             currentJump = jumpMax;
         }
     }
-
-    /*private void PowerUps()
-    {
-        if (action > 0)
-        {
-            //Debug.Log("Playing");
-            playerAnimator.SetInteger("CurrentState", 4);
-        }
-
-        if (movementPU == true)
-        {
-            movementPUTimer += Time.deltaTime;
-            if (movementPUTimer > 5)
-            {
-                speed = speed / 2;
-                movementPU = false;
-            }
-        }
-    }*/
 
     private void CameraFollow()
     {
@@ -346,24 +324,6 @@ public class BetterPlayerMovement : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        //Checking for Power Ups
-        /*if (other.tag == "JumpPU")
-        {
-            if (action > 0)
-            {
-                Destroy(other.gameObject);
-                jumpMax = 2;
-            }
-        }
 
-        if (other.tag == "MovementPU")
-        {
-            if (action > 0)
-            {
-                Destroy(other.gameObject);
-                speed = speed * 2;
-                movementPU = true;
-            }
-        }*/
     }
 }

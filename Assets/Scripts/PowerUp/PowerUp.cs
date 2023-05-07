@@ -4,32 +4,49 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {
-    BetterPlayerMovement playerMovement;
-    [SerializeField] GameObject player;
+    public GameObject player;
+    private PowerUp_Handler powerup_handler;
 
-    // Awake is called before the first frame update
     void Awake()
     {
-        playerMovement = player.GetComponent<BetterPlayerMovement>();
+        powerup_handler = player.GetComponent<PowerUp_Handler>();
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-
-    }
-
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Player")
         {
             switch (this.tag)
             {
-                case "JumpPU":
+                case "Double Jump PU":
                     {
+                        if (!powerup_handler.hasDoubleJumpBeenActivated)
+                        {
+                            powerup_handler.hasDoubleJumpBeenActivated = true;
+                        }
+                        else
+                        {
+                            powerup_handler.double_jump_timer = 0;
+                        }
+                        break;
+
+                    }
+                case "Speed Boost PU":
+                    {
+                        if (!powerup_handler.hasSpeedBoostBeenActivated)
+                        {
+                            powerup_handler.hasSpeedBoostBeenActivated = true;
+                        }
+                        else
+                        {
+                            powerup_handler.speed_boost_timer = 0;
+                        }
                         break;
                     }
             }
+
+            //Debug.Log("Powerup obtained!");
+            Destroy(this.gameObject);
         }
     }
 }
