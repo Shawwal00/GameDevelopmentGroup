@@ -73,6 +73,7 @@ public class BetterPlayerMovement : MonoBehaviour
     //5 Running
     //6 Damaged
     //7 Double Jump
+    //8 Falling
 
     private void Awake()
     {
@@ -388,10 +389,11 @@ public class BetterPlayerMovement : MonoBehaviour
             }
             else
             {
+                
+                playerAnimator.SetInteger("CurrentState", 8);
                 movementBlend = 0;
             }
-
-
+            
             if (acceleration < 1)
             {
                 acceleration += Time.deltaTime / 4;
@@ -403,11 +405,15 @@ public class BetterPlayerMovement : MonoBehaviour
             transform.Translate(movement, Space.World);
 
         }
-        else
+        else if (grounded == false)
         {
             //Idle
             playerAnimator.SetInteger("CurrentState", 0);
             acceleration = 1;
+        }
+        else
+        {
+            playerAnimator.SetInteger("CurrentState", 8);
         }
     }
 
