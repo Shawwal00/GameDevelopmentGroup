@@ -12,9 +12,9 @@ public class EnemyBoss : MonoBehaviour
     HealthController healthcontroller;
 
     [SerializeField]
-    private float damage;
+    public float damage;
 
-    private float damage_player;
+    public float damage_player;
 
     private BetterPlayerMovement playerScript;
     private GameObject sword;
@@ -52,6 +52,7 @@ public class EnemyBoss : MonoBehaviour
         if (other.CompareTag("Player")) 
         {
             other.GetComponent<PlayerStats>().TakeDamage(damage_player);
+            Debug.Log("Working?");
         }
     }
 
