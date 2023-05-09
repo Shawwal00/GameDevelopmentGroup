@@ -9,40 +9,51 @@ public class EnemyBoss : MonoBehaviour
     public NavMeshAgent enemy;
     public Transform player;
 
+    HealthController healthcontroller;
+
     [SerializeField]
-    private float timer = 5;
-    private float bullet_time;
+    private float damage;
 
-    public GameObject enemybullet;
+    private float damage_player;
 
-    public Transform spawnPoint;
+    private BetterPlayerMovement playerScript;
+    private GameObject sword;
+
+    private GameObject Player;
 
     public float enemySpeed;
     
     // Start is called before the first frame update
     void Start()
     {
-        
+        Player = GameObject.FindGameObjectWithTag("Player");
+        playerScript = Player.GetComponent<BetterPlayerMovement>();
+        sword = GameObject.FindGameObjectWithTag("Sword");
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        healthcontroller = GetComponent<HealthController>();
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
         enemy.SetDestination(player.position);
-        ShootAtPlayer();
+        
     }
 
-    void ShootAtPlayer() 
+    private void OnTriggerEnter(Collider other)
     {
-        bullet_time -= Time.deltaTime;
+        if(other.gameObject == sword && playerScript.doAttack) 
+        {
+            healthcontroller.ApplyDamage(damage);
+        }
 
-        if (bullet_time > 0) return;
+        if (other.CompareTag("Player")) 
+        {
+            other.GetComponent<PlayerStats>().TakeDamage(damage_player);
+        }
+    }
 
-        bullet_time = timer;
 
-        GameObject bulletObj = Instantiate(enemybullet, spawnPoint.transform.position, spawnPoint.transform.rotation) as GameObject;
-        Rigidbody bulletRig = bulletObj.GetComponent<Rigidbody>();
-        bulletRig.AddForce(bulletRig.transform.forward * enemySpeed);
-        Destroy(bulletObj, 5f);
-   }
 }
