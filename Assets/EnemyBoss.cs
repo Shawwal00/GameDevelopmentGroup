@@ -43,6 +43,6 @@ public class EnemyBoss : MonoBehaviour
         GameObject bulletObj = Instantiate(enemybullet, spawnPoint.transform.position, spawnPoint.transform.rotation) as GameObject;
         Rigidbody bulletRig = bulletObj.GetComponent<Rigidbody>();
         bulletRig.AddForce(bulletRig.transform.forward * enemySpeed);
-        Destroy(bulletObj, 0.1f);
+        Destroy(bulletObj, 5f);
    }
 }
