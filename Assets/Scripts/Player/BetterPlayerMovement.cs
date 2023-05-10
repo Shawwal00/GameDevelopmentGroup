@@ -15,9 +15,11 @@ public class BetterPlayerMovement : MonoBehaviour
     // Movement
     private Vector2 move;
     [HideInInspector] public float speed = 10;
+    private float acceleration = 1;
     private float playerRotation;
     private Rigidbody playerRB;
     Quaternion endRotation;
+    private float movementBlend = 0;
 
     //Jump
     private float jump;
@@ -28,6 +30,9 @@ public class BetterPlayerMovement : MonoBehaviour
     private int currentJump = 1;
     private bool jumpButton = true;
     private bool grounded = true;
+    private float fallingDown = 5;
+    private ParticleSystem jumpParticles;
+    private bool onGroundParticle = false;
 
     //Interact
     [HideInInspector] public float action;
@@ -46,6 +51,13 @@ public class BetterPlayerMovement : MonoBehaviour
     private float joystickGap;
     private Vector3 xAxis;
     private Camera splineCamera;
+    private float LockOnCam;
+    private GameObject enemy;
+    private bool activateLockOnCamera = false;
+    private List <GameObject> allEnemies;
+    private GameObject[] enemyArray;
+    private int currentEnemy = 0;
+    private bool LockOnZero = false;
 
     //Combat
     private float attacking;
@@ -62,9 +74,13 @@ public class BetterPlayerMovement : MonoBehaviour
     //4 Interact
     //5 Running
     //6 Damaged
+    //7 Double Jump
+    //8 Falling
 
     private void Awake()
     {
+        allEnemies = new List<GameObject>();
+
         health = 100;
 
         attackCooldown = 0.6f;
@@ -73,14 +89,12 @@ public class BetterPlayerMovement : MonoBehaviour
         mainCam = Camera.main;
         playerAnimator = GetComponent<Animator>();
         playerRB = GetComponent<Rigidbody>();
-        
-        
 
         followCamera = Camera.main;
-        offsetZ = -7;
-        offsetY = 5;
+        offsetZ = -8;
+        offsetY = 9;
         offsetX = 0;
-        rotationSpeed = 60;
+        rotationSpeed = 75;
         joystickGap = 0.45f;
 
         //Using Unity's new Input System
@@ -100,6 +114,11 @@ public class BetterPlayerMovement : MonoBehaviour
 
         controls.Player.Attack.performed += ctx => attacking = ctx.ReadValue<float>();
         controls.Player.Attack.canceled += ctx => attacking = 0.0f;
+        
+        controls.Player.LockOnCamera.performed += ctx => LockOnCam = ctx.ReadValue<float>();
+        controls.Player.LockOnCamera.canceled += ctx => LockOnCam = 0.0f;
+        
+        jumpParticles = GameObject.Find("JumpCopy").GetComponent<ParticleSystem>();
 
         
     }
@@ -115,7 +134,6 @@ public class BetterPlayerMovement : MonoBehaviour
         CameraFollow();
         Jumping();
         Attacking();
-        Death();
     }
 
     private void Attacking()
@@ -134,24 +152,16 @@ public class BetterPlayerMovement : MonoBehaviour
                 doAttack = false;
                 attackTimer = attackCooldown;
             }
-
-
         }
     }
-
     
-
-
-    private void Death()
-    {
-        if (health <= 0)
-        {
-            Debug.Log("Death");
-        }
-    }
-
     private void Jumping()
     {
+     
+        if (grounded == true && playerRB.velocity.y <= 0)
+        {
+            playerRB.velocity = new Vector3(playerRB.velocity.x, -fallingDown, 0);
+        }
 
         if (currentJump == 0)
         {
@@ -172,80 +182,177 @@ public class BetterPlayerMovement : MonoBehaviour
             jumpButton = true;
             jumping = false;
         }
-
+        
         if (jumping == true)
         {
-            playerAnimator.SetInteger("CurrentState", 1);
-            playerRB.velocity = new Vector3(playerRB.velocity.x, jumpDistance, 0);
-            if (currentJump == 2)
+            if (jumpMax == 1)
             {
-                currentJump = 1;
-                jumping = false;
-            }
-            else if (currentJump == 1)
-            {
+                playerAnimator.SetInteger("CurrentState", 1);
                 currentJump = 0;
-                jumping = false;
             }
+            else if (jumpMax == 2)
+            {
+                if (currentJump == 2 && grounded == false)
+                {
+                    playerAnimator.SetInteger("CurrentState", 1);
+                } 
+                else if (currentJump == 1)
+                {
+                    playerAnimator.SetInteger("CurrentState", 7);
+                }
+                currentJump -= 1;
+            }
+            
+            jumping = false;
+            playerRB.velocity = new Vector3(playerRB.velocity.x, jumpDistance, 0);
+            onGroundParticle = false;
+            StartCoroutine(JumpParticle());
         }
-
-        if (grounded == false && jump == 0)
+        
+        if (grounded == false && jump == 0) 
         {
             currentJump = jumpMax;
+            if (onGroundParticle == false)
+            {
+                StartCoroutine(JumpParticle());
+                onGroundParticle = true;
+            }
         }
     }
 
     private void CameraFollow()
     {
+       //Getting all the enemies
+        enemyArray = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (var enemy in enemyArray)
+        {
+            if (Vector3.Distance(enemy.transform.position, transform.position) < 30)
+            {
+                allEnemies.Add(enemy);
+            }
+            else if (Vector3.Distance(enemy.transform.position, transform.position) > 30)
+            {
+                if (allEnemies.Contains(enemy))
+                {
+                    allEnemies.Remove(enemy);
+                    activateLockOnCamera = false;
+                }
+            }
+        }
+        
+        
         //Following Player
         xAxis = followCamera.transform.TransformDirection(cameraVector.y, 0.0f, 0.0f);
-
+        
         cameraDistance = new Vector3(transform.position.x + offsetX, transform.position.y + offsetY,
             transform.position.z + offsetZ);
         followCamera.transform.position = cameraDistance;
-
-
-        //Rotation
-        if (cameraVector.x < -joystickGap || cameraVector.x > joystickGap)
+        
+        
+        //Non Lock On
+        if (activateLockOnCamera == false || activateLockOnCamera == true)
         {
-            followCamera.transform.RotateAround(transform.position,
-                new Vector3(0.0f, cameraVector.x, 0.0f), rotationSpeed * Time.deltaTime);
-        }
 
-        if (-cameraVector.y < -joystickGap || -cameraVector.y > joystickGap)
-        {
-            if (followCamera.transform.eulerAngles.x > 5 &&
-                followCamera.transform.eulerAngles.x < 45)
+            followCamera.transform.LookAt(transform);
+            if (cameraVector.x < -joystickGap || cameraVector.x > joystickGap)
             {
                 followCamera.transform.RotateAround(transform.position,
-                    -xAxis, rotationSpeed * Time.deltaTime);
+                    new Vector3(0.0f, cameraVector.x, 0.0f), rotationSpeed * Time.deltaTime);
             }
-            // Going Down
-            else if (followCamera.transform.eulerAngles.x < 5 && -cameraVector.y > 0)
+
+            if (-cameraVector.y < -joystickGap || -cameraVector.y > joystickGap)
             {
-                followCamera.transform.RotateAround(transform.position,
-                   -xAxis, rotationSpeed * Time.deltaTime);
-            }
-            //Going Up
-            else if (followCamera.transform.eulerAngles.x > 45 && -cameraVector.y < 0)
-            {
-                followCamera.transform.RotateAround(transform.position,
-                   -xAxis, rotationSpeed * Time.deltaTime);
+                if (followCamera.transform.eulerAngles.x > 5 &&
+                    followCamera.transform.eulerAngles.x < 45)
+                {
+                    followCamera.transform.RotateAround(transform.position,
+                        -xAxis, rotationSpeed * Time.deltaTime);
+                }
+                // Going Down
+                else if (followCamera.transform.eulerAngles.x < 5 && -cameraVector.y > 0)
+                {
+                    followCamera.transform.RotateAround(transform.position,
+                        -xAxis, rotationSpeed * Time.deltaTime);
+                }
+                //Going Up
+                else if (followCamera.transform.eulerAngles.x > 45 && -cameraVector.y < 0)
+                {
+                    followCamera.transform.RotateAround(transform.position,
+                        -xAxis, rotationSpeed * Time.deltaTime);
+                }
             }
         }
-
         offsetZ = followCamera.transform.position.z - transform.position.z;
         offsetX = followCamera.transform.position.x - transform.position.x;
         offsetY = followCamera.transform.position.y - transform.position.y;
+        
+        //Lock On Camera
+        for (int i = 0; i < allEnemies.Count; i++)
+        {
+            if (allEnemies[i] == null)
+            {
+                allEnemies.Remove(allEnemies[i]);
+            }
+        }
+
+        if (allEnemies.Count > 0)
+        {
+            if (LockOnCam == 0 && activateLockOnCamera == true)
+            {
+                LockOnZero = true;
+            }
+
+            else if (LockOnCam == 0 && activateLockOnCamera == false)
+            {
+                LockOnZero = false;
+            }
+
+            if (LockOnCam > 0 && activateLockOnCamera == false && LockOnZero == false)
+            {
+                activateLockOnCamera = true;
+
+                if (currentEnemy < allEnemies.Count)
+                {
+                    currentEnemy += 1;
+                }
+                else if (currentEnemy == allEnemies.Count)
+                {
+                    currentEnemy = 0;
+                }
+            }
+
+            else if (LockOnCam > 0 && activateLockOnCamera == true && LockOnZero == true)
+            {
+                activateLockOnCamera = false;
+            }
+
+            if (activateLockOnCamera == true)
+            {
+                Debug.DrawLine(transform.position, allEnemies[currentEnemy].transform.position, Color.green, 0.1f);
+                followCamera.transform.LookAt(allEnemies[currentEnemy].transform);
+            }
+        }
     }
 
     private void PlayerControlsUpdate()
     {
+        playerAnimator.SetFloat("Blend", movementBlend);
+        if (move.magnitude > joystickGap && movementBlend < 1)
+        {
+            movementBlend += Time.deltaTime * 2;
+        }
+        else if (move.magnitude < joystickGap && movementBlend > 0)
+        {
+            movementBlend -= Time.deltaTime * 2;
+        }
+
         // Raycast to see if the player is touching the ground
         Ray groundRay = new Ray(transform.position, Vector3.down);
         RaycastHit hit;
         Vector3 groundRaycast = transform.position + new Vector3(0, 0.5f, 0);
 
+        grounded = true;
+        
         if (Physics.Raycast(groundRay, out hit))
         {
             if (hit.distance < 1)
@@ -262,7 +369,7 @@ public class BetterPlayerMovement : MonoBehaviour
         if (move.x < -joystickGap || move.x > joystickGap || move.y < -joystickGap || move.y > joystickGap)
         {
             // Ensuring it takes into account the camera when moving
-            cameraForward = followCamera.transform.forward;//y axis
+            cameraForward = followCamera.transform.forward; //y axis
             cameraRight = followCamera.transform.right; //x axis
 
             cameraForward.y = 0;
@@ -283,7 +390,7 @@ public class BetterPlayerMovement : MonoBehaviour
                 endRotation = Quaternion.Euler(new Vector3(0.0f, playerRotation, 0.0f));
                 transform.rotation =
                     Quaternion.Lerp(transform.rotation, endRotation, 6 * Time.deltaTime); // Ensure this happens
-                                                                                          //Debug.Log(playerRotation);
+
 
                 // transform.rotation = Quaternion.Euler(new Vector3(0.0f, playerRotation, 0.0f)); // Lerp this     
             }
@@ -291,24 +398,35 @@ public class BetterPlayerMovement : MonoBehaviour
             if (grounded == false)
             {
                 //Running
-                playerAnimator.SetInteger("CurrentState", 5);
+                playerAnimator.SetInteger("CurrentState", 0);
             }
             else
             {
-                //Setting to random value to prevent run animation
-                playerAnimator.SetInteger("CurrentState", 10);
+                
+                playerAnimator.SetInteger("CurrentState", 8);
+                movementBlend = 0;
             }
-
+            
+            if (acceleration < 1)
+            {
+                acceleration += Time.deltaTime / 4;
+            }
 
             Vector3 movement =
                 new Vector3(moveDirection.x, 0.0f, moveDirection.z) *
-                (speed * Time.deltaTime); // Get current rotation
+                (speed * acceleration * Time.deltaTime); // Get current rotation
             transform.Translate(movement, Space.World);
+
         }
-        else
+        else if (grounded == false)
         {
             //Idle
             playerAnimator.SetInteger("CurrentState", 0);
+            acceleration = 1;
+        }
+        else
+        {
+            playerAnimator.SetInteger("CurrentState", 8);
         }
     }
 
@@ -321,9 +439,12 @@ public class BetterPlayerMovement : MonoBehaviour
     {
         controls.Player.Disable();
     }
-
-    private void OnTriggerStay(Collider other)
+    
+    IEnumerator JumpParticle()
     {
-
+        ParticleSystem currentJumpParticleSystem;
+        currentJumpParticleSystem = Instantiate(jumpParticles, transform.position, transform.rotation);
+        yield return new WaitForSeconds(1);
+        Destroy(currentJumpParticleSystem.gameObject);
     }
 }

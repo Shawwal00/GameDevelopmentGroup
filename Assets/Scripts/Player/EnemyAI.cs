@@ -16,6 +16,8 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float damage;
 
+    public float damage_player;
+
     private BetterPlayerMovement playerScript;
     private GameObject sword;
 
@@ -45,6 +47,7 @@ public class EnemyAI : MonoBehaviour
         {
             GoBackToPatrol();
         }
+        
 
         
     }
@@ -68,5 +71,12 @@ public class EnemyAI : MonoBehaviour
         {
             healthController.ApplyDamage(damage);
         }
+
+        if (other.CompareTag("Player"))
+        {
+            other.GetComponent<PlayerStats>().TakeDamage(damage_player);
+
+        }
+
     }
 }
