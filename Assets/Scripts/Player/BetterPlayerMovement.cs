@@ -161,6 +161,7 @@ public class BetterPlayerMovement : MonoBehaviour
         if (grounded == true && playerRB.velocity.y <= 0)
         {
             playerRB.velocity = new Vector3(playerRB.velocity.x, -fallingDown, 0);
+            fallingDown += Time.deltaTime;
         }
 
         if (currentJump == 0)
@@ -209,8 +210,9 @@ public class BetterPlayerMovement : MonoBehaviour
             StartCoroutine(JumpParticle());
         }
         
-        if (grounded == false && jump == 0) 
+        if (grounded == false && jump == 0)
         {
+            fallingDown = 5;
             currentJump = jumpMax;
             if (onGroundParticle == false)
             {

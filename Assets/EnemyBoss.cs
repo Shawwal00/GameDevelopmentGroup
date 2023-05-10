@@ -31,8 +31,6 @@ public class EnemyBoss : MonoBehaviour
         sword = GameObject.FindGameObjectWithTag("Sword");
         player = GameObject.FindGameObjectWithTag("Player").transform;
         healthcontroller = GetComponent<HealthController>();
-
-
     }
 
     // Update is called once per frame
@@ -52,7 +50,6 @@ public class EnemyBoss : MonoBehaviour
         if (other.CompareTag("Player")) 
         {
             other.GetComponent<PlayerStats>().TakeDamage(damage_player);
-            Debug.Log("Working?");
         }
     }
 

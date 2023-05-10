@@ -39,6 +39,8 @@ public class PlatformCreation : MonoBehaviour
     private GameObject player;
     private GameObject sword;
 
+    [HideInInspector] public bool restart = false;
+
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -50,7 +52,13 @@ public class PlatformCreation : MonoBehaviour
 
 
     private void FixedUpdate()
-    {    
+    {
+
+        if (restart == true)
+        {
+            ResetPosition();
+        }
+
         //Platform Fall Down
         if (fall == true)
         {
@@ -145,8 +153,18 @@ public class PlatformCreation : MonoBehaviour
             {
                 Destroy(newParentCopy);
                 checkUpdate = true;
+                first = true;
             }
         }
+    }
+
+    public void ResetPosition()
+    {
+        
+        transform.position = startLocation.transform.position;
+        restart = false;
+        fall = false;
+        once = false;
     }
 
 
