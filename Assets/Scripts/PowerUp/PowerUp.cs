@@ -6,6 +6,9 @@ public class PowerUp : MonoBehaviour
 {
     public GameObject player;
     private PowerUp_Handler powerup_handler;
+    public ParticleSystem burst_particle;
+    public GameObject mesh;
+    public ParticleSystem particle_effect;
 
     void Awake()
     {
@@ -45,8 +48,23 @@ public class PowerUp : MonoBehaviour
                     }
             }
 
+            var burst_emission = burst_particle.emission;
+            var burst_duration = burst_particle.main.duration;
+            var particle_emission = particle_effect.emission;
+
+            burst_emission.enabled = true;
+            burst_particle.Play();
+
+            mesh.GetComponent<MeshRenderer>().enabled = false;
+            this.gameObject.GetComponent<SphereCollider>().enabled = false;
+            particle_emission.enabled = false;
             //Debug.Log("Powerup obtained!");
-            Destroy(this.gameObject);
+            Invoke("DestroyObject", burst_duration);
         }
+    }
+
+    void DestroyObject()
+    {
+        Destroy(this.gameObject);
     }
 }
