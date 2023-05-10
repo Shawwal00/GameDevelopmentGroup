@@ -13,9 +13,10 @@ public class PlayerStats : MonoBehaviour
 
     private GameObject jumpPowerUp;
     private GameObject JumpPULocation;
+    private bool secondRespawn;
     private void Start()
     {
-        jumpPowerUp = GameObject.FindWithTag("Double Jump PU");
+        
         JumpPULocation = GameObject.Find("JumpLocationPU");
         CurrentHealth = MaxHealth;
 
@@ -24,10 +25,23 @@ public class PlayerStats : MonoBehaviour
 
     private void Update()
     {
+        if (transform.position.x < -470)
+        {
+            secondRespawn = true;
+        }
+
         if (CurrentHealth <= 0)
         {
+            
             //restart function
-            transform.position = new Vector3(0, 10, 0);
+            if (secondRespawn == true)
+            {
+                transform.position = new Vector3(-466.0f, 121.89f, -1.85f);
+            }
+            else
+            {
+                transform.position = new Vector3(0, 10, 0);
+            }
             CurrentHealth = 100;
             HealthBar.SetSlider(CurrentHealth);
             
@@ -36,7 +50,7 @@ public class PlayerStats : MonoBehaviour
             {
                 platform.GetComponent<PlatformCreation>().restart = true;
             }
-
+            jumpPowerUp = GameObject.FindWithTag("Double Jump PU");
             Instantiate(jumpPowerUp, JumpPULocation.transform.position, JumpPULocation.transform.rotation);
         }
 

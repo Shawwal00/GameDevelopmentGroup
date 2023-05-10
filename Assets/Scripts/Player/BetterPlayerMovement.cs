@@ -330,8 +330,12 @@ public class BetterPlayerMovement : MonoBehaviour
 
             if (activateLockOnCamera == true)
             {
-                Debug.DrawLine(transform.position, allEnemies[currentEnemy].transform.position, Color.green, 0.1f);
-                followCamera.transform.LookAt(allEnemies[currentEnemy].transform);
+                
+                if (!(allEnemies[currentEnemy] == null))
+                {
+                    Debug.DrawLine(transform.position, allEnemies[currentEnemy].transform.position, Color.green, 0.1f);
+                    followCamera.transform.LookAt(allEnemies[currentEnemy].transform);
+                }
             }
         }
     }
