@@ -14,7 +14,6 @@ public class InteractableButtonBase : MonoBehaviour
     private bool playerInTrigger;
     private OwnPlayer playerInput;
     private GameObject player;
-    //private PlayerAnimationHashes playerAnimationHashes;
 
     [Header("Initializers")]
     [SerializeField] private InteractableButton interactableButton;
@@ -33,7 +32,6 @@ public class InteractableButtonBase : MonoBehaviour
         playerInput = new OwnPlayer();
         player = GameObject.FindWithTag("Player");
 
-        //playerAnimationHashes = GameObject.FindWithTag("Player").GetComponent<PlayerAnimationHashes>();
 
         playerInput.Player.ActionInteract.started += OnInteractInput;
         playerInput.Player.ActionInteract.canceled += OnInteractInput;
@@ -92,10 +90,7 @@ public class InteractableButtonBase : MonoBehaviour
                 cameraCutsceneBase.cutsceneCamera.enabled = true;
 
                 player.GetComponent<BetterPlayerMovement>().enabled = false;
-                //playerAnimationHashes.animator.SetBool(playerAnimationHashes.isJoggingBool, false);
-                //playerAnimationHashes.animator.SetBool(playerAnimationHashes.isJumpingBool, false);
                 player.transform.SetPositionAndRotation(playerInteractPosition.transform.position, Quaternion.LookRotation(playerInteractPosition.transform.right));
-                //playerAnimationHashes.animator.SetBool(playerAnimationHashes.isPressingBool, true); 
 
                 canvas.enabled = false;
                 Destroy(gameObject.GetComponent<SphereCollider>());
@@ -103,7 +98,7 @@ public class InteractableButtonBase : MonoBehaviour
             }
         }
 
-        if (cameraCutsceneBase.cutsceneCamera.enabled)// this needs to be if player button press animation has ended
+        if (cameraCutsceneBase.cutsceneCamera.enabled)
         {
             yield return new WaitForSeconds(4);
             cameraCutsceneBase.doorButtonTransition = true;
@@ -116,7 +111,6 @@ public class InteractableButtonBase : MonoBehaviour
             yield return new WaitForSeconds(4);
             cameraCutsceneBase.cutsceneCamera.enabled = false;
             cameraCutsceneBase.playerCamera.enabled = true;
-            //playerAnimationHashes.animator.SetBool(playerAnimationHashes.isPressingBool, false);
             player.GetComponent<BetterPlayerMovement>().enabled = true;
             Destroy(gameObject.GetComponent<InteractableButtonBase>());
         }
