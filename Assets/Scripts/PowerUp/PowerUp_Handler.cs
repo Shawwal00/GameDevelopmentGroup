@@ -8,10 +8,15 @@ public class PowerUp_Handler : MonoBehaviour
 {
     [HideInInspector] public bool hasDoubleJumpBeenActivated = false;
     [HideInInspector] public bool hasSpeedBoostBeenActivated = false;
+    [HideInInspector] public bool hasSlowTrapBeenActivated = false;
+    private bool hasBeenSped = false;
+    private bool hasBeenSlowed = false;
     [HideInInspector] public float double_jump_timer = 0;
     [HideInInspector] public float speed_boost_timer = 0;
+    [HideInInspector] public float slow_timer = 0;
     [HideInInspector] public float double_jump_max_time = 10f;
-    [HideInInspector] public float speed_boost__max_time = 10f;
+    [HideInInspector] public float speed_boost_max_time = 10f;
+    [HideInInspector] public float slow_max_time = 10f;
     private BetterPlayerMovement player;
     private float standard_movement_speed;
     private int standard_max_jumps;
@@ -52,18 +57,46 @@ public class PowerUp_Handler : MonoBehaviour
         if (hasSpeedBoostBeenActivated)
         {
             speed_boost_indicator.SetActive(true);
-            speed_boost_indicator.GetComponent<PowerUp_UI>().UpdateFill(speed_boost_timer, speed_boost__max_time);
-            player.speed = 50;
-            speed_boost_text.text = "Speed Boost \n" + ((int)speed_boost_timer).ToString() + "/" + speed_boost__max_time;
+            speed_boost_indicator.GetComponent<PowerUp_UI>().UpdateFill(speed_boost_timer, speed_boost_max_time);
+            if (!hasBeenSped)
+            {
+                player.speed = player.speed + 20;
+                hasBeenSped = true;
+            }
+            speed_boost_text.text = "Speed Boost \n" + ((int)speed_boost_timer).ToString() + "/" + speed_boost_max_time;
             speed_boost_timer += Time.deltaTime;
             //Debug.Log(timer);
-            if (speed_boost_timer >= speed_boost__max_time)
+            if (speed_boost_timer >= speed_boost_max_time)
             {
                 speed_boost_indicator.SetActive(false);
                 speed_boost_text.text = "";
                 player.speed = standard_movement_speed;
                 hasSpeedBoostBeenActivated = false;
+                hasBeenSped = false;
                 speed_boost_timer = 0;
+            }
+        }
+
+        if (hasSlowTrapBeenActivated)
+        {
+            //slow_indicator.SetActive(true);
+            //slow_indicator.GetComponent<PowerUp_UI>().UpdateFill(slow_timer, slow_max_time);
+            if (!hasBeenSlowed)
+            {
+                player.speed = player.speed - 5;
+                hasBeenSlowed = true;
+            }
+            //slow_text.text = "Speed Boost \n" + ((int)slow_timer).ToString() + "/" + speed_boost__max_time;
+            slow_timer += Time.deltaTime;
+            //Debug.Log(timer);
+            if (slow_timer >= slow_max_time)
+            {
+                //slow_indicator.SetActive(false);
+                //slow_text.text = "";
+                player.speed = player.speed + 5;
+                hasSlowTrapBeenActivated = false;
+                hasBeenSlowed = false;
+                slow_timer = 0;
             }
         }
     }
