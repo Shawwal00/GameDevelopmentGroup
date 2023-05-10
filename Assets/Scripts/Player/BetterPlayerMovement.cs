@@ -31,6 +31,8 @@ public class BetterPlayerMovement : MonoBehaviour
     private bool jumpButton = true;
     private bool grounded = true;
     private float fallingDown = 5;
+    private ParticleSystem jumpParticles;
+    private bool onGroundParticle = false;
 
     //Interact
     [HideInInspector] public float action;
@@ -115,6 +117,8 @@ public class BetterPlayerMovement : MonoBehaviour
         
         controls.Player.LockOnCamera.performed += ctx => LockOnCam = ctx.ReadValue<float>();
         controls.Player.LockOnCamera.canceled += ctx => LockOnCam = 0.0f;
+        
+        jumpParticles = GameObject.Find("JumpCopy").GetComponent<ParticleSystem>();
 
         
     }
@@ -153,6 +157,7 @@ public class BetterPlayerMovement : MonoBehaviour
     
     private void Jumping()
     {
+     
         if (grounded == true && playerRB.velocity.y <= 0)
         {
             playerRB.velocity = new Vector3(playerRB.velocity.x, -fallingDown, 0);
@@ -178,18 +183,16 @@ public class BetterPlayerMovement : MonoBehaviour
             jumping = false;
         }
         
-        if (jumping == true )
+        if (jumping == true)
         {
             if (jumpMax == 1)
             {
-                playerRB.velocity = new Vector3(playerRB.velocity.x, jumpDistance, 0);
                 playerAnimator.SetInteger("CurrentState", 1);
                 currentJump = 0;
-                jumping = false;
             }
             else if (jumpMax == 2)
             {
-                if (currentJump == 2)
+                if (currentJump == 2 && grounded == false)
                 {
                     playerAnimator.SetInteger("CurrentState", 1);
                 } 
@@ -197,15 +200,23 @@ public class BetterPlayerMovement : MonoBehaviour
                 {
                     playerAnimator.SetInteger("CurrentState", 7);
                 }
-                jumping = false;
                 currentJump -= 1;
-                playerRB.velocity = new Vector3(playerRB.velocity.x, jumpDistance, 0);
             }
+            
+            jumping = false;
+            playerRB.velocity = new Vector3(playerRB.velocity.x, jumpDistance, 0);
+            onGroundParticle = false;
+            StartCoroutine(JumpParticle());
         }
         
         if (grounded == false && jump == 0) 
         {
             currentJump = jumpMax;
+            if (onGroundParticle == false)
+            {
+                StartCoroutine(JumpParticle());
+                onGroundParticle = true;
+            }
         }
     }
 
@@ -340,6 +351,8 @@ public class BetterPlayerMovement : MonoBehaviour
         RaycastHit hit;
         Vector3 groundRaycast = transform.position + new Vector3(0, 0.5f, 0);
 
+        grounded = true;
+        
         if (Physics.Raycast(groundRay, out hit))
         {
             if (hit.distance < 1)
@@ -426,9 +439,12 @@ public class BetterPlayerMovement : MonoBehaviour
     {
         controls.Player.Disable();
     }
-
-    private void OnTriggerStay(Collider other)
+    
+    IEnumerator JumpParticle()
     {
-
+        ParticleSystem currentJumpParticleSystem;
+        currentJumpParticleSystem = Instantiate(jumpParticles, transform.position, transform.rotation);
+        yield return new WaitForSeconds(1);
+        Destroy(currentJumpParticleSystem.gameObject);
     }
 }
