@@ -1346,6 +1346,7 @@ MonoBehaviour:
   enemy: {fileID: 777072501}
   player: {fileID: 1903549974}
   damage: 3
+  damage_player: 20
   enemySpeed: 7
 --- !u!64 &777072503
 MeshCollider:
