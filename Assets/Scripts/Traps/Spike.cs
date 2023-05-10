@@ -8,8 +8,8 @@ public class Spike : MonoBehaviour
     private float stop_point;
     private float start_point;
     private bool isResetting = false;
-    //public GameObject player_hp;
-    private int damage;
+    public GameObject player_hp;
+    [SerializeField] public int damage;
 
     // Start is called before the first frame update
     void Start()
@@ -44,7 +44,7 @@ public class Spike : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-            //player_hp.GetComponent<HealthController>().ApplyDamage(damage);
+            player_hp.GetComponent<PlayerStats>().TakeDamage(damage);
             //Debug.Log("Player Hit");
             this.GetComponent<BoxCollider>().enabled = false;
 
