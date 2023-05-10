@@ -24,6 +24,11 @@ public class PlayerStats : MonoBehaviour
             CurrentHealth = 100;
             HealthBar.SetSlider(CurrentHealth);
         }
+
+        if(transform.position.y < -10) 
+        {
+            CurrentHealth = 0;
+        }
     }
 
     public void TakeDamage(float amount) 
