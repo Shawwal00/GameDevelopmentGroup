@@ -22,8 +22,13 @@ public class PowerUp_Handler : MonoBehaviour
     private int standard_max_jumps;
     public TextMeshProUGUI double_jump_text;
     public TextMeshProUGUI speed_boost_text;
+    public TextMeshProUGUI slow_text;
     public GameObject speed_boost_indicator;
     public GameObject double_jump_indicator;
+    public GameObject slow_indicator;
+    public GameObject speed_trail;
+    public GameObject double_jump_trail;
+    public GameObject slow_trail;
 
     void Awake()
     {
@@ -32,6 +37,10 @@ public class PowerUp_Handler : MonoBehaviour
         standard_max_jumps = player.jumpMax;
         double_jump_indicator.SetActive(false);
         speed_boost_indicator.SetActive(false);
+        slow_indicator.SetActive(false);
+        speed_trail.GetComponent<TrailRenderer>().enabled = false;
+        double_jump_trail.GetComponent<TrailRenderer>().enabled = false;
+        slow_trail.GetComponent<TrailRenderer>().enabled = false;
     }
 
     void FixedUpdate()
@@ -39,6 +48,7 @@ public class PowerUp_Handler : MonoBehaviour
         if (hasDoubleJumpBeenActivated)
         {
             double_jump_indicator.SetActive(true);
+            double_jump_trail.GetComponent<TrailRenderer>().enabled = true;
             double_jump_indicator.GetComponent<PowerUp_UI>().UpdateFill(double_jump_timer, double_jump_max_time);
             player.jumpMax = 2;
             double_jump_text.text = "Double Jump \n" + ((int)double_jump_timer).ToString() + "/" + double_jump_max_time;
@@ -47,6 +57,7 @@ public class PowerUp_Handler : MonoBehaviour
             if (double_jump_timer >= double_jump_max_time)
             {
                 double_jump_indicator.SetActive(false);
+                double_jump_trail.GetComponent<TrailRenderer>().enabled = false;
                 double_jump_text.text = "";
                 player.jumpMax = standard_max_jumps;
                 hasDoubleJumpBeenActivated = false;
@@ -57,6 +68,7 @@ public class PowerUp_Handler : MonoBehaviour
         if (hasSpeedBoostBeenActivated)
         {
             speed_boost_indicator.SetActive(true);
+            speed_trail.GetComponent<TrailRenderer>().enabled = true;
             speed_boost_indicator.GetComponent<PowerUp_UI>().UpdateFill(speed_boost_timer, speed_boost_max_time);
             if (!hasBeenSped)
             {
@@ -69,6 +81,7 @@ public class PowerUp_Handler : MonoBehaviour
             if (speed_boost_timer >= speed_boost_max_time)
             {
                 speed_boost_indicator.SetActive(false);
+                speed_trail.GetComponent<TrailRenderer>().enabled = false;
                 speed_boost_text.text = "";
                 player.speed = standard_movement_speed;
                 hasSpeedBoostBeenActivated = false;
@@ -79,20 +92,22 @@ public class PowerUp_Handler : MonoBehaviour
 
         if (hasSlowTrapBeenActivated)
         {
-            //slow_indicator.SetActive(true);
-            //slow_indicator.GetComponent<PowerUp_UI>().UpdateFill(slow_timer, slow_max_time);
+            slow_indicator.SetActive(true);
+            slow_trail.GetComponent<TrailRenderer>().enabled = true;
+            slow_indicator.GetComponent<PowerUp_UI>().UpdateFill(slow_timer, slow_max_time);
             if (!hasBeenSlowed)
             {
                 player.speed = player.speed - 5;
                 hasBeenSlowed = true;
             }
-            //slow_text.text = "Speed Boost \n" + ((int)slow_timer).ToString() + "/" + speed_boost__max_time;
+            slow_text.text = "Speed Boost \n" + ((int)slow_timer).ToString() + "/" + speed_boost_max_time;
             slow_timer += Time.deltaTime;
             //Debug.Log(timer);
             if (slow_timer >= slow_max_time)
             {
-                //slow_indicator.SetActive(false);
-                //slow_text.text = "";
+                slow_indicator.SetActive(false);
+                slow_trail.GetComponent<TrailRenderer>().enabled = false;
+                slow_text.text = "";
                 player.speed = player.speed + 5;
                 hasSlowTrapBeenActivated = false;
                 hasBeenSlowed = false;
